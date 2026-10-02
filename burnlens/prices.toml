@@ -1,0 +1,53 @@
+# Published list prices, USD per million tokens. Weights in the report are derived from these.
+#
+# This file goes stale. Prices fell roughly 80-200x between 2024 and 2026, so a number here that
+# nobody has checked is wrong rather than approximate. `as_of` drives the staleness warning on
+# every weighted figure; update the date only when the prices were actually re-checked.
+
+as_of = "2026-09-12"
+stale_after_days = 90
+source = "vendor pricing pages; re-check before quoting any weighted figure"
+
+[models."claude-opus-5"]
+input = 5.0
+cache_write = 6.25
+cache_read = 0.5
+output = 25.0
+
+# 5.5 reads at 5% of input; cache_write is the usual 1.25x, which the pricing page does not list
+[models."claude-opus-5-5"]
+input = 4.0
+cache_write = 5.0
+cache_read = 0.2
+output = 20.0
+
+[models."claude-sonnet-5"]
+input = 2.0
+cache_write = 2.5
+cache_read = 0.2
+output = 10.0
+
+[models."claude-sonnet-5-5"]
+input = 2.0
+cache_write = 2.5
+cache_read = 0.2
+output = 10.0
+
+[models."claude-haiku-4-5"]
+input = 1.0
+cache_write = 1.25
+cache_read = 0.1
+output = 5.0
+
+[models."claude-fable-5"]
+input = 10.0
+cache_write = 12.5
+cache_read = 1.0
+output = 50.0
+
+# 5.1 ships a cheaper cache read than 5 at the same base price; the longest marker wins
+[models."claude-fable-5-1"]
+input = 10.0
+cache_write = 12.5
+cache_read = 0.25
+output = 50.0

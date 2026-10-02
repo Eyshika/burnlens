@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Burnlens</title>
+  <link rel="icon" href="/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="/logo.svg" alt="" width="28" height="28">
+      <span class="brand-name" id="app-name">Burnlens</span>
+      <span class="brand-tag">improve your AI workflows</span>
+    </div>
+    <div class="controls">
+      <div class="pills" id="range" role="tablist" aria-label="Time range">
+        <button role="tab" data-days="7">7 days</button>
+        <button role="tab" data-days="30">30 days</button>
+        <button role="tab" data-days="90">90 days</button>
+        <button role="tab" data-days="0">All</button>
+      </div>
+      <div class="zone" id="zone" data-zone="green" title="Live zone across active sessions"><span class="dot"></span><span id="zone-text">Green · idle</span></div>
+      <button class="ghost" id="refresh" title="Re-read transcripts">Refresh</button>
+      <button class="ghost" id="theme" title="Toggle light / dark">Theme</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <p class="meta" id="meta">Loading transcripts…</p>
+
+    <section class="card" id="actions-card" aria-labelledby="actions-title">
+      <div class="card-head"><h2 id="actions-title">Improve a workflow</h2><button class="ghost" id="refresh-actions">Refresh measurements</button></div>
+      <p class="hint">Review → apply → measure. Start with full-log capture and a smaller output preview.</p>
+      <p id="action-message" role="status" aria-live="polite"></p>
+      <div id="actions">Loading improvement opportunities…</div>
+    </section>
+
+    <section class="card live" id="live-card">
+      <div class="card-head">
+        <h2>Live now</h2>
+        <span class="hint" id="live-hint">last 10 min · live</span>
+      </div>
+      <div id="brake" class="brake"></div>
+      <div id="alerts" class="alerts"></div>
+      <div id="live" class="live-grid"></div>
+    </section>
+
+    <section class="tiles" id="tiles" aria-label="Key numbers"></section>
+
+    <section class="card" id="org-card" hidden>
+      <div class="card-head">
+        <h2>Across applications and people</h2>
+        <span class="hint">same algorithm, every source</span>
+      </div>
+      <div class="grid2">
+        <div><h3 class="sub">By application</h3><div class="hbars" id="by-agent"></div></div>
+        <div><h3 class="sub">By person</h3><div class="hbars" id="by-user"></div></div>
+      </div>
+      <table class="table" id="people"></table>
+    </section>
+
+    <section class="card" id="unattended-card" hidden>
+      <div class="card-head">
+        <h2>Unattended agents</h2>
+        <span class="hint">scheduled and CI runs · nobody is watching these</span>
+      </div>
+      <table class="table clickable" id="workflows"></table>
+    </section>
+
+    <section class="card" id="map-card">
+      <div class="card-head">
+        <h2>Token flow map</h2>
+        <div class="controls-inline"><span class="hint">size = tokens · hover isolates · click a session</span><div class="pills small" id="map-mode"><button data-mode="3d" aria-selected="true">3D</button><button data-mode="2d">2D</button></div></div>
+      </div>
+      <div class="map-legend" id="map-legend"></div>
+      <div class="map-wrap"><canvas id="map"></canvas><div id="map3d" hidden></div></div>
+    </section>
+
+    <section class="grid2">
+      <div class="card">
+        <div class="card-head"><h2>When the tokens burn</h2><span class="hint">weekday × hour</span></div>
+        <div class="heatmap" id="heatmap"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Where the tokens went</h2><span class="hint">application › project › session · colour = health</span></div>
+        <div class="treemap-wrap"><canvas id="treemap"></canvas></div>
+      </div>
+    </section>
+
+    <section class="card" id="coach-card">
+      <div class="card-head">
+        <h2>Coach</h2>
+        <span class="hint">habits · week over week · what to say</span>
+      </div>
+      <div class="coach-try">
+        <input id="coach-input" type="text" placeholder="Paste the prompt you are about to send…" aria-label="Prompt to coach">
+        <button class="ghost" id="coach-btn">Coach it</button>
+      </div>
+      <div id="coach-out"></div>
+      <div id="habits" class="habits"></div>
+    </section>
+
+    <section class="card" id="teacher-card" hidden>
+      <div class="card-head">
+        <h2>Teacher</h2>
+        <span class="hint">the platform feature your prompts say you are missing · draft included</span>
+      </div>
+      <div id="lessons" class="lessons"></div>
+    </section>
+
+    <section class="card" id="findings-card">
+      <div class="card-head">
+        <h2>Opportunities to investigate</h2>
+        <span class="hint">what · evidence · fix</span>
+      </div>
+      <div id="findings" class="findings"></div>
+    </section>
+
+    <section class="grid2">
+      <div class="card">
+        <div class="card-head"><h2>Tokens per day</h2><span class="hint">stacked by token class</span></div>
+        <div class="legend" id="day-legend"></div>
+        <div class="chart" id="day-chart"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Context size per turn</h2><span class="hint">share of turns</span></div>
+        <div class="hbars" id="hist"></div>
+      </div>
+    </section>
+
+    <section class="grid2">
+      <div class="card">
+        <div class="card-head"><h2>Tokens by model</h2><span class="hint" id="sub-hint"></span></div>
+        <div class="hbars" id="models"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Bytes into context, by tool</h2></div>
+        <div class="hbars" id="tools"></div>
+      </div>
+    </section>
+
+    <section class="grid2">
+      <div class="card">
+        <div class="card-head"><h2>Files read most</h2></div>
+        <table class="table" id="files"></table>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Shell commands by output</h2></div>
+        <table class="table" id="commands"></table>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Sessions</h2><span class="hint">click to open</span></div>
+      <table class="table clickable" id="sessions"></table>
+    </section>
+  </main>
+
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div>
+        <div class="drawer-title" id="drawer-title">Session</div>
+        <div class="drawer-sub" id="drawer-sub"></div>
+      </div>
+      <button class="ghost" id="drawer-close" aria-label="Close">Close</button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+  <div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
+
+  <script src="/vendor/3d-force-graph.min.js" onerror="window.__no3d=true"></script>
+  <script src="/graph.js"></script>
+  <script src="/app.js"></script>
+  <script src="/actions.js"></script>
+</body>
+</html>

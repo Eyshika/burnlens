@@ -1,0 +1,30 @@
+# Burnlens: the waste algorithm is configuration, not code.
+# Copy to ./burnlens.toml or ~/.burnlens/burnlens.toml, or pass --config / BURNLENS_CONFIG.
+
+[thresholds]
+context_tokens = 150000            # context above this counts as bloated (amber); 2x = red
+large_payload_bytes = 50000        # a tool result above this is "large"
+long_session_turns = 500
+repeated_read_count = 10
+image_reread_count = 2
+subagent_premium_share = 0.5
+live_active_minutes = 10
+live_window_minutes = 5
+live_burn_warn_per_min = 1000000
+live_burn_high_per_min = 3000000
+live_context_high_multiplier = 2.0
+
+[rules]
+# any of: context-bloat, long-session, repeated-reads, image-rereads, large-payloads, subagent-premium-model
+disabled = []
+
+[models]
+# substrings of model names that count as the expensive tier
+premium_markers = ["opus", "fable", "mythos"]
+
+[tiers]
+# candidate tier to evaluate per task kind; quality equivalence is not established
+# kinds: lookup, research, summarize, small-edit, tests, docs, debug, design, general
+lookup = "haiku"
+research = "sonnet"
+debug = "opus"

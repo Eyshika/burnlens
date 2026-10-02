@@ -1,0 +1,62 @@
+[project]
+name = "burnlens"
+version = "0.1.0"
+description = "See where your AI coding agent's tokens went, what wasted them, and what to do about it. Local, no account, no proxy."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Eyshika Agarwal" }]
+keywords = ["claude-code", "codex", "gemini-cli", "tokens", "llm", "observability", "cost", "profiler", "ai-agents"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+    "Topic :: System :: Monitoring",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/Eyshika/burnlens"
+Issues = "https://github.com/Eyshika/burnlens/issues"
+Changelog = "https://github.com/Eyshika/burnlens/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+burnlens = "burnlens.cli:main"
+tokprof = "burnlens.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["burnlens*"]
+
+[tool.setuptools.package-data]
+burnlens = ["static/*", "static/vendor/*", "prices.toml"]
+
+[tool.ruff]
+line-length = 200
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "B"]
+# E741: `lambda l:` reads fine here. E501: lines run long on purpose.
+ignore = ["E501", "E741"]
+
+[tool.ruff.lint.per-file-ignores]
+# tests re-import shared fixtures from test_profiler; that is the pytest pattern, not a redefinition
+"tests/*" = ["F811"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

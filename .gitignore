@@ -1,0 +1,24 @@
+__pycache__/
+*.pyc
+.venv/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# secrets and local state
+.env
+.env.*
+!.env.example
+burnlens.toml
+!burnlens.example.toml
+
+# exports and private material never belong here
+*.csv
+*.pptx
+.scratch-*
+
+# transient: created by `uv run --with`, not a managed lockfile
+uv.lock
+.DS_Store
