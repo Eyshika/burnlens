@@ -60,7 +60,7 @@ def _global_options(parser: argparse.ArgumentParser, suppress: bool) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="burnlens", description="Review AI coding usage and evaluate improvements across agents.")
+    parser = argparse.ArgumentParser(prog="burnlens", description="Profile where an AI coding agent's tokens went, and coach what to change.")
     parser.add_argument("--version", action="version", version=f"burnlens {__version__}")
     _global_options(parser, suppress=False)
 

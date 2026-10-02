@@ -1,7 +1,7 @@
 [project]
 name = "burnlens"
 version = "0.1.0"
-description = "See where your AI coding agent's tokens went, what wasted them, and what to do about it. Local, no account, no proxy."
+description = "A profiler and coach for AI coding agents: see where your tokens went, and what to change. Local, no account, no proxy."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

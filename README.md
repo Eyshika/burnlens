@@ -9,7 +9,7 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen.svg)](pyproject.toml)
 
-**See where your AI coding agent's tokens went, what wasted them, and what to do about it.**
+**A profiler and coach for AI coding agents: see where your tokens went, and what to change.**
 
 Burnlens reads the transcripts your agent already writes, shows live sessions as they burn,
 and (optionally) steps in before an expensive tool call. It runs on your machine. No account,
@@ -269,12 +269,26 @@ All thresholds are in [`burnlens.example.toml`](burnlens.example.toml).
 - A cheaper-model suggestion never establishes equal quality.
 - Cursor and Copilot expose little locally; they need an export.
 
-## Alternatives
+## How it's different
 
-[ccusage](https://github.com/ryoppippi/ccusage) is the established daily and session cost
-report across many agents. Burnlens adds per-file, per-command and per-subagent attribution,
-live alerts, the pre-call brake and the coach. Claude Code's native OpenTelemetry export covers
-metrics if you already run a collector; Burnlens can ingest it.
+Most tools here answer "how much did I spend?". Burnlens answers "why did the tokens go there, and what should I change?"
+
+| | Burnlens | [ccusage](https://github.com/ryoppippi/ccusage) | [TokenTracker](https://github.com/xiufengsun/TokenTracker) |
+|---|---|---|---|
+| Main question | Why, and what to change | What each day, session and 5-hour block cost | Usage and limits across many tools |
+| Dollar cost reports | No: token classes and a labelled estimate | Yes | Yes |
+| Inside a session: files, commands, subagents | Yes | not listed | per project |
+| Live view of active sessions, with alerts | Yes | statusline (beta) | rate-limit widgets |
+| Findings with evidence | Yes | not listed | not listed |
+| Prompt coaching, habit lessons, handoff briefs | Yes | not listed | not listed |
+| Hooks that ask or deny a tool call | Claude Code | not listed | not listed |
+| Agents | Claude Code, Codex, Gemini CLI natively; others by export | about 18 sources | about 43 tools |
+
+Compared from each project's README on 2026-10-02. "Not listed" means the README does not mention it, not that the feature is absent. Both are good tools.
+
+Use ccusage for a dollar spend report. Use TokenTracker for the widest tool coverage and quota tracking. Use Burnlens when you want to know what drove a session's tokens and what to do differently. They run side by side, since all three only read local files.
+
+Claude Code's native OpenTelemetry export covers metrics if you already run a collector, and Burnlens can ingest it.
 
 ## Development
 

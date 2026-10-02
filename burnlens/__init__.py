@@ -1,3 +1,3 @@
-"""burnlens: profile where an AI coding agent's tokens went."""
+"""burnlens: a profiler and coach for AI coding agents."""
 
 __version__ = "0.1.0"
