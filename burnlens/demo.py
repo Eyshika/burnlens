@@ -158,7 +158,7 @@ def build_generic(root: Path, seed: int = 11) -> int:
                     if not waste and rng.random() < 0.6:
                         tools.append({"name": "apply_patch", "input": {"file_path": f"services/billing/{rng.choice(['invoice', 'tax', 'ledger'])}.py"}, "result_bytes": 200})
                     rec = {
-                        "session_id": sid, "project": "checkout" if user == "sam" else "billing", "user": user, "agent": "codex",
+                        "session_id": sid, "project": "checkout" if user == "sam" else "billing", "user": "me", "agent": "codex",
                         "ts": iso(day + timedelta(seconds=30 * i)), "model": "gpt-5" if user == "sam" else "gpt-5-mini",
                         "usage": {"input_tokens": 20, "cache_read_input_tokens": ctx, "cache_creation_input_tokens": 800, "output_tokens": rng.randint(80, 600)},
                         "tools": tools,
@@ -175,7 +175,7 @@ def build_generic(root: Path, seed: int = 11) -> int:
                 sid = f"sb-{day_offset}-{k}"
                 for i in range(40):
                     rec = {
-                        "session_id": sid, "project": "support-bot", "user": "prod", "agent": "support-bot",
+                        "session_id": sid, "project": "support-bot", "user": "me", "agent": "support-bot",
                         "ts": iso(day + timedelta(minutes=k * 60, seconds=20 * i)), "model": "claude-sonnet-5-5",
                         "usage": {"input_tokens": 400, "cache_read_input_tokens": 180_000, "cache_creation_input_tokens": 0, "output_tokens": 150},
                         "tools": [{"name": "retrieve", "input": {}, "result_bytes": 95_000}],
@@ -194,7 +194,7 @@ def build_generic(root: Path, seed: int = 11) -> int:
             n = 260 if runaway else 40
             for i in range(n):
                 rec = {
-                    "session_id": f"triage-run-{day_offset}", "project": "platform", "user": "svc-triage", "agent": "triage-agent", "workflow": "nightly-triage", "run_kind": "scheduled",
+                    "session_id": f"triage-run-{day_offset}", "project": "platform", "user": "me", "agent": "triage-agent", "workflow": "nightly-triage", "run_kind": "scheduled",
                     "ts": iso(day + timedelta(seconds=20 * i)), "model": "claude-opus-5-5",
                     "usage": {"input_tokens": 30, "cache_read_input_tokens": 60_000 + i * (1_500 if runaway else 400), "cache_creation_input_tokens": 500, "output_tokens": 0 if silent else rng.randint(40, 200)},
                     "tools": [{"name": "shell", "input": {"command": "gh issue list --limit 200 --json body"}, "result_bytes": 180_000}] if runaway and i % 3 == 0 else [],
@@ -214,7 +214,7 @@ def build_generic(root: Path, seed: int = 11) -> int:
             payloads.append({
                 "id": f"chatcmpl-{day_offset}-{i}", "trace_id": f"rag-{day_offset}", "session_id": f"rag-{day_offset}", "call_type": "acompletion", "status": "success",
                 "startTime": (day + timedelta(seconds=40 * i)).timestamp(), "model": "gpt-5", "prompt_tokens": 140_000, "completion_tokens": 300, "total_tokens": 140_300,
-                "metadata": {"user_api_key_alias": "docs-assistant", "user_api_key_team_alias": "platform", "user_api_key_user_id": "lee",
+                "metadata": {"user_api_key_alias": "docs-assistant", "user_api_key_team_alias": "platform", "user_api_key_user_id": "me",
                              "usage_object": {"prompt_tokens": 140_000, "completion_tokens": 300, "prompt_tokens_details": {"cached_tokens": 120_000}}},
                 "messages": [{"role": "user", "content": "how do I rotate the signing key"}, {"role": "tool", "tool_call_id": f"c{i}", "content": "k" * 70_000}],
                 "response": {"choices": [{"message": {"role": "assistant", "content": "Here is the procedure.", "tool_calls": [{"id": f"c{i}", "type": "function", "function": {"name": "retrieve", "arguments": "{}"}}]}}]},

@@ -180,13 +180,18 @@
   function renderOrg(r) {
     const agents = Object.entries(r.by_agent || {});
     const users = Object.entries(r.by_user || {});
-    const show = agents.length > 1 || users.length > 0;
+    const multiUser = users.length > 1;
+    const show = agents.length > 1 || multiUser;
     $("org-card").hidden = !show;
     if (!show) return;
+    $("org-card").querySelector("h2").textContent = multiUser ? "Across applications and people" : "Across applications";
+    $("by-user").parentElement.hidden = !multiUser;
+    $("people").hidden = !multiUser;
+    $("by-agent").closest(".grid2").style.gridTemplateColumns = multiUser ? "" : "1fr";
     const maxA = Math.max(...agents.map(([, u]) => u.total)) || 1;
     $("by-agent").innerHTML = hbars(agents.map(([a, u]) => ({ name: a, value: u.total, share: u.total / maxA, tip: `<b>${esc(a)}</b><br>${fmt(u.total)} tokens · ${pct(u.cache_read_input_tokens, u.total)} cache re-reads` })), (row) => fmt(row.value));
     const maxU = Math.max(...users.map(([, u]) => u.total)) || 1;
-    $("by-user").innerHTML = users.length ? hbars(users.map(([n, u]) => ({ name: n, value: u.total, share: u.total / maxU, tip: `<b>${esc(n)}</b><br>${fmt(u.total)} tokens` })), (row) => fmt(row.value)) : `<div class="hint">No per-person data in this source. Generic traces carry a <code>user</code> field.</div>`;
+    $("by-user").innerHTML = hbars(users.map(([n, u]) => ({ name: n, value: u.total, share: u.total / maxU, tip: `<b>${esc(n)}</b><br>${fmt(u.total)} tokens` })), (row) => fmt(row.value));
     const people = r.people || [];
     $("people").innerHTML = people.length ? table(["Person", "Applications", "Sessions", "Tokens", "Bloated turns", "Health"], people.map((p) => [
       `<td><span class="chip-user" data-user="${esc(p.user)}" title="Show this person's habits">${esc(p.user)}</span></td>`, `<td class="num">${esc(p.agents.join(", "))}</td>`, `<td class="num">${full(p.sessions)}</td>`, `<td class="num">${fmt(p.tokens)}</td>`,
