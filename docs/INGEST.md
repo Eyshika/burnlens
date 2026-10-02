@@ -51,16 +51,16 @@ sized by their `output`; session = trace `sessionId`, else the trace id; person 
 application = trace `name`. Field names follow the public API objects; if your export differs,
 send one row and the mapping is a five-line change.
 
-## Claude Code fleets: OTLP receiver (shared server)
+## Claude Code telemetry: local OTLP receiver
 
-Every Burnlens server is also an OpenTelemetry endpoint. Each developer sets five variables
-(managed settings can push them org-wide):
+Burnlens accepts Claude Code OpenTelemetry logs at `/v1/logs`. The dashboard binds to
+`127.0.0.1` by default, so this endpoint is available only on the same machine:
 
 ```bash
 export CLAUDE_CODE_ENABLE_TELEMETRY=1
 export OTEL_LOGS_EXPORTER=otlp
 export OTEL_EXPORTER_OTLP_PROTOCOL=http/json
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://<burnlens-host>:8765
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:8765
 export OTEL_LOG_TOOL_DETAILS=1        # optional: file paths and commands for the rules
 export OTEL_LOG_USER_PROMPTS=1        # optional: prompt text for the coach
 ```
@@ -68,9 +68,13 @@ export OTEL_LOG_USER_PROMPTS=1        # optional: prompt text for the coach
 Claude Code then streams `claude_code.api_request`, `claude_code.tool_result`,
 `claude_code.user_prompt` and `claude_code.assistant_response` events, each carrying `session.id`,
 `user.email` and `organization.id`. Burnlens folds them into generic records under
-`~/.burnlens/otlp/` (override with `BURNLENS_OTLP_DIR`) and reads them like any other source, so the
-per-person view, habits and coach work for a whole team without touching any laptop's transcripts.
+`~/.burnlens/otlp/` (override with `BURNLENS_OTLP_DIR`) and reads them like any other source.
 Metrics and traces posted to `/v1/metrics` and `/v1/traces` are accepted and ignored.
+
+This receiver has no authentication. Although `burnlens ui --host` can bind to another interface,
+do not expose the dashboard or receiver directly to a network or use it as a shared fleet server.
+Remote collection needs an authenticated, access-controlled boundary that Burnlens does not provide;
+see the README's privacy section for the server's current limits.
 
 ## Unattended agents
 
