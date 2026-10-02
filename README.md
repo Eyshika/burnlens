@@ -1,4 +1,8 @@
-# Burnlens
+<p align="center">
+  <img src="burnlens/static/logo.svg" alt="Burnlens logo" width="96" height="96">
+</p>
+
+<h1 align="center">Burnlens</h1>
 
 [![CI](https://github.com/Eyshika/burnlens/actions/workflows/ci.yml/badge.svg)](https://github.com/Eyshika/burnlens/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
