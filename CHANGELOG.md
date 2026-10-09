@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Attribute hook-injected context: user messages injected by hooks (`<system-reminder>` blocks,
+  SessionStart `additionalContext`) are now measured per session (`hook_chars`, `hook_injections`)
+  instead of being silently dropped. A new `hook-injection` finding flags sessions where injected
+  context is a large share of what the model read. Per-hook attribution (which hook injected what)
+  is the follow-up.
+
 ## 0.1.0 - 2026-10-02
 
 First open-source release.

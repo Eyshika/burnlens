@@ -72,6 +72,8 @@ class SessionStat:
     turns_over_threshold: int
     payload_bytes: int = 0
     repeated_read_calls: int = 0
+    hook_chars: int = 0
+    hook_injections: int = 0
     subagent_usage: Usage = field(default_factory=Usage)
     premium_subagent_tokens: int = 0
 
@@ -224,6 +226,8 @@ def aggregate(sessions: list[Session], context_threshold: int, large_payload_byt
                 turns_over_threshold=over,
                 payload_bytes=payload_bytes,
                 repeated_read_calls=repeated_reads,
+                hook_chars=session.hook_chars,
+                hook_injections=session.hook_injections,
             )
         )
 

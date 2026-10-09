@@ -121,6 +121,8 @@ class Session:
     run_kind: str = "interactive"  # interactive | scheduled | ci
     prompts: list[str] = field(default_factory=list)  # every user prompt, truncated; the teacher reads these
     prompt_chars: list[int] = field(default_factory=list)  # original length of each prompt (pasted content shows here)
+    hook_chars: int = 0  # chars of hook-injected user content (<system-reminder> blocks etc.); the human never wrote this
+    hook_injections: int = 0  # how many hook-injected messages were observed
 
     @property
     def is_subagent(self) -> bool:

@@ -9,7 +9,7 @@ from .aggregate import Aggregates
 from .model import IMAGE_SUFFIXES
 
 PREMIUM_MODEL_MARKERS: tuple[str, ...] = ("opus", "fable", "mythos")
-RULE_NAMES: tuple[str, ...] = ("context-bloat", "long-session", "repeated-reads", "image-rereads", "large-payloads", "subagent-premium-model", "unattended-runaway", "edit-then-verify")
+RULE_NAMES: tuple[str, ...] = ("context-bloat", "long-session", "repeated-reads", "image-rereads", "large-payloads", "subagent-premium-model", "unattended-runaway", "edit-then-verify", "hook-injection")
 
 
 @dataclass(frozen=True)
@@ -42,6 +42,7 @@ class Thresholds:
     live_context_high_multiplier: float = 2.0
     workflow_runaway_ratio: float = 2.0  # latest run vs the workflow's median
     workflow_min_runs: int = 3
+    hook_share: float = 0.15  # estimated hook-injected share of context before flagging
     premium_markers: tuple[str, ...] = PREMIUM_MODEL_MARKERS
 
     def is_premium(self, model: str) -> bool:
@@ -76,7 +77,7 @@ class Finding:
 def detect(agg: Aggregates, th: Thresholds, disabled: frozenset[str] = frozenset()) -> list[Finding]:
     """Run every enabled rule; return findings ordered high to low severity."""
     findings: list[Finding] = []
-    for rule in (_context_bloat, _long_sessions, _repeated_reads, _image_rereads, _large_payloads, _subagent_premium, _unattended_runaway, _edit_then_verify):
+    for rule in (_context_bloat, _long_sessions, _repeated_reads, _image_rereads, _large_payloads, _subagent_premium, _unattended_runaway, _edit_then_verify, _hook_injection):
         finding = rule(agg, th)
         if finding is not None and finding.rule not in disabled:
             findings.append(finding)
@@ -135,6 +136,38 @@ def _context_bloat(agg: Aggregates, th: Thresholds) -> Finding | None:
             f"Context exceeded {th.context_tokens // 1000}k; this can be necessary for complex work. "
             "At a natural task boundary, review a handoff brief and retain the evidence needed for the next step. "
             "Compare completion and rework before treating a shorter session as an improvement."
+        ),
+    )
+
+
+def _hook_injection(agg: Aggregates, th: Thresholds) -> Finding | None:
+    """Context injected by hooks (SessionStart boards, system-reminders): read by the model, never written by the human."""
+    hooked = [s for s in agg.sessions if not s.is_subagent and s.hook_chars > 0]
+    if not hooked:
+        return None
+    hook_tokens = sum(s.hook_chars for s in hooked) // 4  # chars are measured; tokens are estimated
+    total_context = agg.usage.context
+    share = hook_tokens / total_context if total_context else 0.0
+    if share < th.hook_share:
+        return None
+    evidence = [
+        f"{s.session_id[:8]}  {s.hook_injections:>3} injections  ~{s.hook_chars // 4:>8,} tok  | {s.first_prompt[:50]}"
+        for s in sorted(hooked, key=lambda s: s.hook_chars, reverse=True)[: th.max_examples]
+    ]
+    return Finding(
+        rule="hook-injection",
+        severity="high" if share >= 0.3 else "medium",
+        title=f"Hook-injected context is ~{share:.0%} of what the model read ({hook_tokens:,} est. tokens)",
+        evidence=evidence,
+        suggestion=(
+            "This context came from hooks (SessionStart boards, reminders), not from anything typed. "
+            "Audit which hooks are installed and what each injects; trim boards to what the session actually needs. "
+            "A stable marker in each hook's output would let burnlens attribute this per hook instead of as one bucket."
+        ),
+        savings_status="unmeasured",
+        savings_basis=(
+            "Hook output is measured in chars from the transcript and converted at ~4 chars/token; "
+            "not a verified reduction and not a ledger row."
         ),
     )
 

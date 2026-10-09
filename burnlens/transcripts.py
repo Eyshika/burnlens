@@ -154,16 +154,28 @@ def _absorb_assistant(
 def _absorb_user(message: dict[str, Any], calls_by_id: dict[str, ToolCall], session: Session) -> None:
     content = message.get("content")
     if isinstance(content, str):
-        if not content.startswith("<"):
-            prompt = " ".join(content.split())[:FIRST_PROMPT_CHARS]
-            session.last_prompt = prompt
-            if not session.first_prompt:
-                session.first_prompt = prompt
-            if len(session.prompts) < PROMPTS_PER_SESSION:
-                session.prompts.append(content.strip()[:PROMPT_KEEP_CHARS])
-                session.prompt_chars.append(len(content))
+        if content.startswith("<"):
+            # Hook-injected context (e.g. <system-reminder>...</system-reminder>, SessionStart
+            # additionalContext): the human never wrote this. Attribute it instead of dropping it.
+            # Identifying which hook injected each block is a follow-up; see findings.py.
+            session.hook_chars += len(content)
+            session.hook_injections += 1
+            return
+        prompt = " ".join(content.split())[:FIRST_PROMPT_CHARS]
+        session.last_prompt = prompt
+        if not session.first_prompt:
+            session.first_prompt = prompt
+        if len(session.prompts) < PROMPTS_PER_SESSION:
+            session.prompts.append(content.strip()[:PROMPT_KEEP_CHARS])
+            session.prompt_chars.append(len(content))
         return
     for block in _blocks(content):
+        if block.get("type") == "text":
+            text = str(block.get("text") or "")
+            if text.lstrip().startswith("<system-reminder"):
+                session.hook_chars += len(text)
+                session.hook_injections += 1
+            continue
         if block.get("type") != "tool_result":
             continue
         call = calls_by_id.get(str(block.get("tool_use_id") or ""))
@@ -211,3 +223,4 @@ def _parse_timestamp(raw: Any) -> datetime | None:
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
+
